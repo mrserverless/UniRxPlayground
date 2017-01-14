@@ -8,10 +8,12 @@ namespace Assets.Scripts.Installers
     public class SettingsInstaller : ScriptableObjectInstaller<SettingsInstaller>
     {
         public PlayerController.Config PlayerConfig;
+        public CameraBob.Config CameraConfig;
 
         public override void InstallBindings()
         {
             Container.BindInstance(PlayerConfig);
+            Container.BindInstance(CameraConfig);
         }
     }
 }

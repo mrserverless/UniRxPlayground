@@ -1,11 +1,11 @@
-using Assets.Scripts.Observers;
+using Assets.Scripts.Character;
+using Assets.Scripts.Observables;
 using Zenject;
 
 public class GameInstaller : MonoInstaller<GameInstaller>
 {
     public override void InstallBindings()
     {
-        Container.Bind<Inputs>().FromGameObject();
-//        Container.BindAllInterfacesAndSelf<PlayerController>().To<PlayerController>().AsSingle();
+        // do nothing
     }
 }

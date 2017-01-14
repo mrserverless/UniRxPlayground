@@ -16,4 +16,8 @@ MonoBehaviour:
     MinViewAngle: -60
     MaxViewAngle: 60
     MouseSensitivity: 100
-    RunSpeed: 10
+    RunSpeed: 20
+    StrideLength: 2.5
+  CameraConfig:
+    WalkBobMagnitude: 0.05
+    RunBobMagnitude: 0.1
