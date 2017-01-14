@@ -9,28 +9,13 @@ namespace Assets.Scripts.Character
     [RequireComponent(typeof(CharacterController))]
     public class PlayerController : MonoBehaviour
     {
-        public float walkSpeed = 5f;
+        [Inject] private readonly Config _config;
 
-        private CharacterController _character;
-        private Camera _camera;
+        [Inject] private CharacterController _character;
 
-        [Inject]
-        Inputs _inputs;
+        [Inject] private Camera _camera;
 
-//        public PlayerController(
-////            CharacterController character, Camera camera,
-//            Inputs inputs)
-//        {
-////            _character = character;
-////            _camera = camera;
-//            _inputs = inputs;
-//        }
-
-        private void Awake()
-        {
-            _character = GetComponent<CharacterController>();
-            _camera = GetComponentInChildren<Camera>();
-        }
+        [Inject] private Inputs _inputs;
 
         private void Start()
         {
@@ -38,7 +23,7 @@ namespace Assets.Scripts.Character
                 .Where(v => v != Vector2.zero)
                 .Subscribe(inputMovement =>
                 {
-                    var inputVelocity = inputMovement * walkSpeed;
+                    var inputVelocity = inputMovement * (_inputs.Run.Value ? _config.RunSpeed : _config.WalkSpeed);
 
                     var playerVelocity =
                         inputVelocity.x * transform.right +
@@ -46,7 +31,62 @@ namespace Assets.Scripts.Character
 
                     var distance = playerVelocity * Time.fixedDeltaTime;
                     _character.Move(distance);
+                })
+                .AddTo(this);
+
+            // Handle mouse input (free mouse look).
+            _inputs.Mouselook
+                .Where(v => v != Vector2.zero) // We can ignore this if mouse look is zero.
+                .Subscribe(inputLook => {
+                    // Translate 2D mouse input into euler angle rotations.
+
+                    // inputLook.x rotates the character around the vertical axis (with + being right)
+                    var horzLook = inputLook.x * Time.deltaTime * Vector3.up * _config.MouseSensitivity;
+                    transform.localRotation *= Quaternion.Euler(horzLook);
+
+                    // inputLook.y rotates the camera around the horizontal axis (with + being up)
+                    var vertLook = inputLook.y * Time.deltaTime * Vector3.left * _config.MouseSensitivity;
+                    var newQ = _camera.transform.localRotation * Quaternion.Euler(vertLook);
+
+                    // We have to flip the signs and positions of min/max view angle here because the math
+                    // uses the contradictory interpretation of our angles (+/- is down/up).
+                    _camera.transform.localRotation = ClampRotationAroundXAxis(newQ, -_config.MaxViewAngle, -_config.MinViewAngle);
                 }).AddTo(this);
+        }
+
+        // Ripped straight out of the Standard Assets MouseLook script. (This should really be a standard function...)
+        private static Quaternion ClampRotationAroundXAxis(Quaternion q, float minAngle, float maxAngle) {
+            q.x /= q.w;
+            q.y /= q.w;
+            q.z /= q.w;
+            q.w = 1.0f;
+
+            float angleX = 2.0f * Mathf.Rad2Deg * Mathf.Atan(q.x);
+
+            angleX = Mathf.Clamp(angleX, minAngle, maxAngle);
+
+            q.x = Mathf.Tan(0.5f * Mathf.Deg2Rad * angleX);
+
+            return q;
+        }
+
+        [Serializable]
+        public class Config
+        {
+            [Range(0, 10)]
+            public float WalkSpeed = 5;
+
+            [Range(-90, 0)]
+            public float MinViewAngle = -60f; // How much can the user look down (in degrees)
+
+            [Range(0, 90)]
+            public float MaxViewAngle = 60f; // How much can the user look up (in degrees)
+
+            [Range(0, 200)]
+            public float MouseSensitivity = 100f;
+
+            [Range(10, 20)]
+            public float RunSpeed = 10;
         }
     }
 }

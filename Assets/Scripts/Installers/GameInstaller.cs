@@ -5,7 +5,7 @@ public class GameInstaller : MonoInstaller<GameInstaller>
 {
     public override void InstallBindings()
     {
-        Container.BindAllInterfacesAndSelf<Inputs>().FromGameObject();
+        Container.Bind<Inputs>().FromGameObject();
 //        Container.BindAllInterfacesAndSelf<PlayerController>().To<PlayerController>().AsSingle();
     }
 }
