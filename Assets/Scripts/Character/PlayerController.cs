@@ -22,7 +22,7 @@ namespace Assets.Scripts.Character
         private Inputs _inputs;
 
         private Subject<Vector3> walked; // We get to see this as a Subject
-        public UniRx.IObservable<Vector3> Walked
+        public IObservable<Vector3> Walked
         {
             // Everyone else sees it as an IObservable
             get { return walked; }

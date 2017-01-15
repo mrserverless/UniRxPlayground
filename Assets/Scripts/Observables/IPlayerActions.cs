@@ -1,4 +1,4 @@
-﻿using UniRx;
+﻿using System;
 using UnityEngine;
 
 namespace Assets.Scripts.Observables
