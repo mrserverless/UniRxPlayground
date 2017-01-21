@@ -30,7 +30,6 @@ namespace Models
             // Structs
             // Unions
             // Generics
-            ZeroFormatter.Formatters.Formatter.RegisterList<ZeroFormatter.Formatters.DefaultResolver, int>();
         }
     }
 }
@@ -73,13 +72,12 @@ namespace Models.DynamicObjectSegments.Models
             {
                 var startOffset = offset;
 
-                offset += (8 + 4 * (3 + 1));
+                offset += (8 + 4 * (2 + 1));
                 offset += ObjectSegmentHelper.SerializeFromFormatter<TTypeResolver, int>(ref bytes, startOffset, offset, 0, value.Age);
                 offset += ObjectSegmentHelper.SerializeFromFormatter<TTypeResolver, string>(ref bytes, startOffset, offset, 1, value.FirstName);
                 offset += ObjectSegmentHelper.SerializeFromFormatter<TTypeResolver, string>(ref bytes, startOffset, offset, 2, value.LastName);
-                offset += ObjectSegmentHelper.SerializeFromFormatter<TTypeResolver, global::System.Collections.Generic.IList<int>>(ref bytes, startOffset, offset, 3, value.List);
 
-                return ObjectSegmentHelper.WriteSize(ref bytes, startOffset, offset, 3);
+                return ObjectSegmentHelper.WriteSize(ref bytes, startOffset, offset, 2);
             }
         }
 
@@ -98,7 +96,7 @@ namespace Models.DynamicObjectSegments.Models
     public class PlayerObjectSegment<TTypeResolver> : global::Models.Player, IZeroFormatterSegment
         where TTypeResolver : ITypeResolver, new()
     {
-        static readonly int[] __elementSizes = new int[]{ 4, 0, 0, 0 };
+        static readonly int[] __elementSizes = new int[]{ 4, 0, 0 };
 
         readonly ArraySegment<byte> __originalBytes;
         readonly DirtyTracker __tracker;
@@ -107,7 +105,6 @@ namespace Models.DynamicObjectSegments.Models
 
         CacheSegment<TTypeResolver, string> _FirstName;
         CacheSegment<TTypeResolver, string> _LastName;
-        global::System.Collections.Generic.IList<int> _List;
 
         // 0
         public override int Age
@@ -148,20 +145,6 @@ namespace Models.DynamicObjectSegments.Models
             }
         }
 
-        // 3
-        public override global::System.Collections.Generic.IList<int> List
-        {
-            get
-            {
-                return _List;
-            }
-            set
-            {
-                __tracker.Dirty();
-                _List = value;
-            }
-        }
-
 
         public PlayerObjectSegment(DirtyTracker dirtyTracker, ArraySegment<byte> originalBytes)
         {
@@ -171,11 +154,10 @@ namespace Models.DynamicObjectSegments.Models
             this.__tracker = dirtyTracker = dirtyTracker.CreateChild();
             this.__binaryLastIndex = BinaryUtil.ReadInt32(ref __array, originalBytes.Offset + 4);
 
-            this.__extraFixedBytes = ObjectSegmentHelper.CreateExtraFixedBytes(this.__binaryLastIndex, 3, __elementSizes);
+            this.__extraFixedBytes = ObjectSegmentHelper.CreateExtraFixedBytes(this.__binaryLastIndex, 2, __elementSizes);
 
             _FirstName = new CacheSegment<TTypeResolver, string>(__tracker, ObjectSegmentHelper.GetSegment(originalBytes, 1, __binaryLastIndex, __tracker));
             _LastName = new CacheSegment<TTypeResolver, string>(__tracker, ObjectSegmentHelper.GetSegment(originalBytes, 2, __binaryLastIndex, __tracker));
-            _List = ObjectSegmentHelper.DeserializeSegment<TTypeResolver, global::System.Collections.Generic.IList<int>>(originalBytes, 3, __binaryLastIndex, __tracker);
         }
 
         public bool CanDirectCopy()
@@ -193,14 +175,13 @@ namespace Models.DynamicObjectSegments.Models
             if (__extraFixedBytes != null || __tracker.IsDirty)
             {
                 var startOffset = offset;
-                offset += (8 + 4 * (3 + 1));
+                offset += (8 + 4 * (2 + 1));
 
                 offset += ObjectSegmentHelper.SerializeFixedLength<TTypeResolver, int>(ref targetBytes, startOffset, offset, 0, __binaryLastIndex, __originalBytes, __extraFixedBytes, __tracker);
                 offset += ObjectSegmentHelper.SerializeCacheSegment<TTypeResolver, string>(ref targetBytes, startOffset, offset, 1, ref _FirstName);
                 offset += ObjectSegmentHelper.SerializeCacheSegment<TTypeResolver, string>(ref targetBytes, startOffset, offset, 2, ref _LastName);
-                offset += ObjectSegmentHelper.SerializeSegment<TTypeResolver, global::System.Collections.Generic.IList<int>>(ref targetBytes, startOffset, offset, 3, _List);
 
-                return ObjectSegmentHelper.WriteSize(ref targetBytes, startOffset, offset, 3);
+                return ObjectSegmentHelper.WriteSize(ref targetBytes, startOffset, offset, 2);
             }
             else
             {

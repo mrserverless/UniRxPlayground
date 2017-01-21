@@ -22,8 +22,5 @@ namespace Models
         {
             get { return FirstName + LastName; }
         }
-
-        [Index(3)]
-        public virtual IList<int> List { get; set; }
     }
 }
