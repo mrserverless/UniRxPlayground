@@ -1,8 +1,10 @@
+using ZeroFormatter;
+
 #pragma warning disable 618
 #pragma warning disable 612
 #pragma warning disable 414
 #pragma warning disable 168
-namespace ZeroFormatter
+namespace Models
 {
     using global::System;
     using global::System.Collections.Generic;
@@ -24,7 +26,7 @@ namespace ZeroFormatter
 
             // Enums
             // Objects
-            ZeroFormatter.Formatters.Formatter<ZeroFormatter.Formatters.DefaultResolver, global::Player>.Register(new ZeroFormatter.DynamicObjectSegments.PlayerFormatter<ZeroFormatter.Formatters.DefaultResolver>());
+            ZeroFormatter.Formatters.Formatter<ZeroFormatter.Formatters.DefaultResolver, global::Models.Player>.Register(new Models.DynamicObjectSegments.Models.PlayerFormatter<ZeroFormatter.Formatters.DefaultResolver>());
             // Structs
             // Unions
             // Generics
@@ -40,14 +42,14 @@ namespace ZeroFormatter
 #pragma warning disable 612
 #pragma warning disable 414
 #pragma warning disable 168
-namespace ZeroFormatter.DynamicObjectSegments
+namespace Models.DynamicObjectSegments.Models
 {
     using global::System;
     using global::ZeroFormatter.Formatters;
     using global::ZeroFormatter.Internal;
     using global::ZeroFormatter.Segments;
 
-    public class PlayerFormatter<TTypeResolver> : Formatter<TTypeResolver, global::Player>
+    public class PlayerFormatter<TTypeResolver> : Formatter<TTypeResolver, global::Models.Player>
         where TTypeResolver : ITypeResolver, new()
     {
         public override int? GetLength()
@@ -55,7 +57,7 @@ namespace ZeroFormatter.DynamicObjectSegments
             return null;
         }
 
-        public override int Serialize(ref byte[] bytes, int offset, global::Player value)
+        public override int Serialize(ref byte[] bytes, int offset, global::Models.Player value)
         {
             var segment = value as IZeroFormatterSegment;
             if (segment != null)
@@ -81,7 +83,7 @@ namespace ZeroFormatter.DynamicObjectSegments
             }
         }
 
-        public override global::Player Deserialize(ref byte[] bytes, int offset, DirtyTracker tracker, out int byteSize)
+        public override global::Models.Player Deserialize(ref byte[] bytes, int offset, DirtyTracker tracker, out int byteSize)
         {
             byteSize = BinaryUtil.ReadInt32(ref bytes, offset);
             if (byteSize == -1)
@@ -93,7 +95,7 @@ namespace ZeroFormatter.DynamicObjectSegments
         }
     }
 
-    public class PlayerObjectSegment<TTypeResolver> : global::Player, IZeroFormatterSegment
+    public class PlayerObjectSegment<TTypeResolver> : global::Models.Player, IZeroFormatterSegment
         where TTypeResolver : ITypeResolver, new()
     {
         static readonly int[] __elementSizes = new int[]{ 4, 0, 0, 0 };

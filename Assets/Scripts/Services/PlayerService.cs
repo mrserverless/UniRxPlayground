@@ -2,13 +2,14 @@
 using ZeroFormatter;
 using Models;
 
-public class PlayerService  {
-
-    public byte[] SendPlayer(Player player)
+namespace Services
+{
+    public class PlayerService
     {
-        var bytes = ZeroFormatterSerializer.Serialize(player);
-        return bytes;
+        public byte[] SendPlayer(Player player)
+        {
+            var bytes = ZeroFormatterSerializer.Serialize(player);
+            return bytes;
+        }
     }
-
-
 }

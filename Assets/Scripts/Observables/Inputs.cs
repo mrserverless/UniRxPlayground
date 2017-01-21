@@ -2,7 +2,7 @@
 using UniRx.Triggers;
 using UnityEngine;
 
-namespace Assets.Scripts.Observables
+namespace Observables
 {
     public class Inputs : MonoBehaviour
     {
