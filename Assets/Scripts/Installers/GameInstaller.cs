@@ -6,6 +6,6 @@ public class GameInstaller : MonoInstaller<GameInstaller>
 {
     public override void InstallBindings()
     {
-        // do nothing
+        Container.Bind<IWebSocketClient>().To<WebsocketSharpClient>().AsSingle();
     }
 }
