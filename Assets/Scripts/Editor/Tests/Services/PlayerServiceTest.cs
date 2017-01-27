@@ -1,6 +1,6 @@
 ﻿using Models;
 using NUnit.Framework;
-using UnityEditor.SceneManagement;
+using UniRx.WebSocket;
 
 namespace Services
 {
@@ -16,7 +16,7 @@ namespace Services
         public void TestSendPlayer()
         {
             // given
-            var wsClient = new MockWsClient();
+            var wsClient = new MockWs();
             var playerService = new PlayerService(wsClient);
             var player = new Player();
 
@@ -27,12 +27,5 @@ namespace Services
             Assert.IsNotEmpty(data);
         }
 
-    }
-
-    class MockWsClient : IWebSocketClient
-    {
-        public void Send(byte[] data)
-        {
-        }
     }
 }

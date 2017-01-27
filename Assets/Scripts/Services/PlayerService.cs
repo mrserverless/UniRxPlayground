@@ -1,21 +1,22 @@
 ﻿using Models;
+using UniRx.WebSocket;
 using ZeroFormatter;
 
 namespace Services
 {
     public class PlayerService
     {
-        private IWebSocketClient _wsClient;
+        private IObservableWS _ws;
 
-        public PlayerService(IWebSocketClient wsClient)
+        public PlayerService(IObservableWS ws)
         {
-            _wsClient = wsClient;
+            _ws = ws;
         }
 
         public byte[] SendPlayer(Player player)
         {
             var bytes = ZeroFormatterSerializer.Serialize(player);
-            _wsClient.Send(bytes);
+            _ws.SendAsync(bytes);
             return bytes;
         }
     }
