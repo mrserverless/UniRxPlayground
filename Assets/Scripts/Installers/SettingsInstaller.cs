@@ -1,5 +1,5 @@
-using Assets.Scripts.Character;
-using Services;
+using System;
+using Character;
 using UniRx.WebSocket;
 using UnityEngine;
 using Zenject;
@@ -18,6 +18,14 @@ namespace Assets.Scripts.Installers
             Container.BindInstance(PlayerConfig);
             Container.BindInstance(CameraConfig);
             Container.BindInstance(WebSocketConfig);
+
+            Container.BindInstance(webSocketUrl()).WhenInjectedInto<IObservableWS>();
+
+        }
+
+        private Uri webSocketUrl()
+        {
+            return new Uri(WebSocketConfig.url);
         }
     }
 }

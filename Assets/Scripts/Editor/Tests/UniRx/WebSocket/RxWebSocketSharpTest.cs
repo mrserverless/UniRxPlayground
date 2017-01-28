@@ -5,7 +5,7 @@ using UniRx;
 using UniRx.WebSocket;
 using WebSocketSharp;
 
-namespace Services
+namespace UniRx.WebSocket
 {
     public class RxWebSocketSharpTest
     {

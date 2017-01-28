@@ -5,9 +5,8 @@ using UniRx;
 using UnityEngine;
 using Zenject;
 
-namespace Assets.Scripts.Character
+namespace Character
 {
-    [RequireComponent(typeof(CharacterController))]
     public class PlayerController : MonoBehaviour, IPlayerActions
     {
         [Inject]
@@ -22,11 +21,12 @@ namespace Assets.Scripts.Character
         [Inject]
         private Inputs _inputs;
 
-        private Subject<Vector3> walked; // We get to see this as a Subject
+        private Subject<Vector3> _walked; // We get to see this as a Subject
+
         public UniRx.IObservable<Vector3> Walked
         {
             // Everyone else sees it as an IObservable
-            get { return walked; }
+            get { return _walked; }
         }
 
         public float StrideLength
@@ -36,7 +36,7 @@ namespace Assets.Scripts.Character
 
         private void Awake()
         {
-            walked = new Subject<Vector3>().AddTo(this);
+            _walked = new Subject<Vector3>().AddTo(this);
         }
 
         private void Start()
@@ -55,7 +55,7 @@ namespace Assets.Scripts.Character
                     _character.Move(distance);
 
                     // signal walk has happened
-                    walked.OnNext(_character.velocity * Time.fixedDeltaTime);
+                    _walked.OnNext(_character.velocity * Time.fixedDeltaTime);
                 })
                 .AddTo(this);
 
