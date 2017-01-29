@@ -19,11 +19,10 @@ namespace Assets.Scripts.Installers
             Container.BindInstance(CameraConfig);
             Container.BindInstance(WebSocketConfig);
 
-            Container.BindInstance(webSocketUrl()).WhenInjectedInto<IObservableWS>();
-
+            Container.Bind<Uri>().FromMethod(WebSocketUrl).WhenInjectedInto<IObservableWS>();
         }
 
-        private Uri webSocketUrl()
+        private Uri WebSocketUrl(InjectContext context)
         {
             return new Uri(WebSocketConfig.url);
         }

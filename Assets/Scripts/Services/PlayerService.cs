@@ -1,4 +1,6 @@
-﻿using Models;
+﻿using System;
+using Character;
+using Models;
 using UniRx.WebSocket;
 using ZeroFormatter;
 
@@ -6,12 +8,17 @@ namespace Services
 {
     public class PlayerService
     {
-        private IObservableWS _ws;
+        private readonly IObservableWS _ws;
+        private readonly PlayerContext _playerContext;
 
-        public PlayerService(IObservableWS ws)
+        public PlayerService(IObservableWS ws, PlayerContext playerContext)
         {
             _ws = ws;
+            _playerContext = playerContext;
         }
+
+
+
 
         public byte[] SendPlayer(Player player)
         {

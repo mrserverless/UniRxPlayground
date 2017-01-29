@@ -21,3 +21,5 @@ MonoBehaviour:
   CameraConfig:
     WalkBobMagnitude: 0.05
     RunBobMagnitude: 0.1
+  WebSocketConfig:
+    url: wss://a2qu7oonfd0b2x.iot.ap-southeast-2.amazonaws.com/mqtt

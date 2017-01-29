@@ -1,4 +1,5 @@
-﻿using Models;
+﻿using Character;
+using Models;
 using NUnit.Framework;
 using UniRx.WebSocket;
 
@@ -17,7 +18,7 @@ namespace Services
         {
             // given
             var wsClient = new MockWs();
-            var playerService = new PlayerService(wsClient);
+            var playerService = new PlayerService(wsClient, new PlayerContext());
             var player = new Player();
 
             // when

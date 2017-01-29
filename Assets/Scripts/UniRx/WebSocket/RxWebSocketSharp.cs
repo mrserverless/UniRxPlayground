@@ -41,14 +41,7 @@ namespace UniRx.WebSocket
             return _ws.ReadyState;
         }
 
-        public UniRx.IObservable<Unit> Connected()
-        {
-            return Observable.FromEvent<EventHandler>(
-                h => (send, e) => h(), h => _ws.OnOpen += h, h => _ws.OnOpen -= h
-            );
-        }
-
-        public UniRx.IObservable<MessageEventArgs> Receive()
+        public IObservable<MessageEventArgs> Receive()
         {
             return Observable
                 .FromEvent<EventHandler<MessageEventArgs>, MessageEventArgs>(
@@ -56,7 +49,7 @@ namespace UniRx.WebSocket
             );
         }
 
-        public UniRx.IObservable<ErrorEventArgs> Errors()
+        public IObservable<ErrorEventArgs> Errors()
         {
             return Observable.FromEvent<EventHandler<ErrorEventArgs>, ErrorEventArgs>(
                 h => (sender, e) => h(e), h => _ws.OnError += h, h => _ws.OnError -= h
