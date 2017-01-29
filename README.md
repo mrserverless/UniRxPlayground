@@ -18,12 +18,13 @@ Inspired by https://ornithoptergames.com/reactiverx-in-unity3d-part-1/ series.
 The following external assets are needed to run this project.
 
 *Asset Store*
-* UniRx
+* [UniRx] (https://github.com/neuecc/UniRx)
 * Standard Assets
-* Zenject
+* Zenject (https://github.com/modesttree/Zenject)
 
 *GitHub*
-* WebSocketSharp
+* [WebSocketSharp](https://github.com/sta/websocket-sharp)
+* [AWS Unity SDK](https://github.com/aws/aws-sdk-net/blob/master/Unity.README.md) - v3.3.45
 
 *Bitbucket*
-* CSharp70Support
+* CSharp70Support -optiona
