@@ -42,8 +42,5 @@ namespace Services
                 return _credentials;
             }
         }
-
-        private IAmazonWebSocket _wsClient;
-
     }
 }

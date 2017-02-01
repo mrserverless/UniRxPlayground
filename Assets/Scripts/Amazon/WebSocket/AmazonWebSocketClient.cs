@@ -20,7 +20,10 @@ namespace Amazon.WebSocket
 
         public string ComputeSignature(Uri host, Credentials credentials, RegionEndpoint region)
         {
-            var canonicalQueryString = GetCanonicalQueryString(credentials, region);
+
+            var signedAt = DateTime.UtcNow;
+
+            var canonicalQueryString = GetCanonicalQueryString(credentials, region, signedAt);
             GetCanonicalRequest(canonicalQueryString);
             return "";
         }
@@ -30,6 +33,7 @@ namespace Amazon.WebSocket
         {
             const string method = "GET";
             const string canonicalUri = "/mqtt";
+
 
             var canonicalRequest = new StringBuilder()
                 .AppendFormat("{0}\n", method)
@@ -41,9 +45,8 @@ namespace Amazon.WebSocket
             return canonicalRequest.ToString();
         }
 
-        public string GetCanonicalQueryString(Credentials credentials, RegionEndpoint region)
+        public string GetCanonicalQueryString(Credentials credentials, RegionEndpoint region, DateTime signedAt)
         {
-            var signedAt = DateTime.UtcNow;
             var amzdate = signedAt.ToString(ISO8601BasicDateTimeFormat, CultureInfo.InvariantCulture);
 
             var dateStamp = signedAt.ToString(AWSSDKUtils.ISO8601BasicDateFormat, CultureInfo.InvariantCulture);
