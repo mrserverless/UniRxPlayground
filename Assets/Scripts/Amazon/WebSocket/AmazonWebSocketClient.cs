@@ -1,47 +1,89 @@
 ﻿using System;
+using System.Collections.Specialized;
+using System.Globalization;
+using System.Text;
+using Amazon.CognitoIdentity.Model;
 using Amazon.Runtime;
 using Amazon.Runtime.Internal;
+using Amazon.Util;
 
 namespace Amazon.WebSocket
 {
     public class AmazonWebSocketClient
     {
-        private const string ServiceName = "iotdevicegateway";
+        public const string Algorithm = "AWS4-HMAC-SHA256";
 
-        private readonly AWS4UnitySigner _unitySigner;
+        public const string ISO8601BasicDateTimeFormat = "yyyyMMddTHHmmssZ";
+        public const string ISO8601BasicDateFormat = "yyyyMMdd";
+        public const string Service = "iotdevicegateway";
+        public const string Terminator = "aws4_request";
 
-        private readonly IClientConfig _config;
-        private readonly AWSCredentials _credentials;
-
-
-        public AmazonWebSocketClient(AWSCredentials credentials, RegionEndpoint region)
+        public string ComputeSignature(Uri host, Credentials credentials, RegionEndpoint region)
         {
-            _credentials = credentials;
-            _config = new AmazonWebSocketConfig {RegionEndpoint = region};
-            _unitySigner = new AWS4UnitySigner();
+            var canonicalQueryString = GetCanonicalQueryString(credentials, region);
+            GetCanonicalRequest(canonicalQueryString);
+            return "";
         }
 
-        public AmazonWebSocketClient(string awsAccessKeyId, string awsSecretAccessKey, RegionEndpoint region)
-            : this(new BasicAWSCredentials(awsAccessKeyId, awsSecretAccessKey), region)
+        // http://docs.aws.amazon.com/general/latest/gr/sigv4-create-canonical-request.html
+        private static string GetCanonicalRequest(string canonicalQueryString)
         {
+            const string method = "GET";
+            const string canonicalUri = "/mqtt";
+
+            var canonicalRequest = new StringBuilder()
+                .AppendFormat("{0}\n", method)
+                .AppendFormat("{0}\n", canonicalUri)
+                .AppendFormat("{0}\n", canonicalQueryString);
+//            canonicalRequest.AppendFormat("{0}\n", GetCanonicalHeaders(request, signedHeaders));
+//            canonicalRequest.AppendFormat("{0}\n", String.Join(";", signedHeaders));
+//            canonicalRequest.Append(GetPayloadHash(request));
+            return canonicalRequest.ToString();
         }
 
-        public string SignRequest(Uri endpoint)
+        public string GetCanonicalQueryString(Credentials credentials, RegionEndpoint region)
         {
-            var uri = "/mqtt";
-            var algorithm = "AWS4-HMAC-SHA256";
+            var signedAt = DateTime.UtcNow;
+            var amzdate = signedAt.ToString(ISO8601BasicDateTimeFormat, CultureInfo.InvariantCulture);
 
-            var request = new DefaultRequest(new UpgradeWebSocketRequest(), ServiceName)
+            var dateStamp = signedAt.ToString(AWSSDKUtils.ISO8601BasicDateFormat, CultureInfo.InvariantCulture);
+            var scope = string.Format(CultureInfo.InvariantCulture, "{0}/{1}/{2}/{3}", dateStamp, region.SystemName,
+                Service, Terminator);
+
+            var secretKey = credentials.SecretKey;
+            var accessKey = credentials.AccessKeyId;
+
+            var queryString = new StringBuilder()
+                .Append("&X-Amz-Algorithm=" + Algorithm)
+                .Append("&X-Amz-Credential=" + accessKey + '/' + scope)
+                .Append("&" + HeaderKeys.XAmzDateHeader + "=" + amzdate)
+                .Append("&X-Amz-Expires=86400")
+                .Append("&" + HeaderKeys.XAmzSignedHeadersHeader + "=host");
+
+            return queryString.ToString();
+        }
+    }
+
+    static class Utils
+    {
+        private const string ValidUrlCharacters =
+            "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-_.~";
+
+        public static string UrlEncode(string data)
+        {
+            StringBuilder encoded = new StringBuilder();
+            foreach (char symbol in Encoding.UTF8.GetBytes(data))
             {
-                HttpMethod = "GET",
-                UseSigV4 = true,
-                Endpoint = endpoint
-            };
-
-            _unitySigner.SignRequest(request, _config, null, _credentials.GetCredentials().AccessKey,
-                _credentials.GetCredentials().SecretKey);
-
-            return request.ToString();
+                if (ValidUrlCharacters.IndexOf(symbol) != -1)
+                {
+                    encoded.Append(symbol);
+                }
+                else
+                {
+                    encoded.Append("%").Append(string.Format(CultureInfo.InvariantCulture, "{0:X2}", (int) symbol));
+                }
+            }
+            return encoded.ToString();
         }
     }
 }

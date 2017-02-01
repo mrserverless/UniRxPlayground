@@ -30,7 +30,7 @@ namespace Amazon
     /// <summary>
     /// AWS4 protocol signer for service calls that transmit authorization in the header field "Authorization".
     /// </summary>
-    public class AWS4UnitySigner : AbstractAWSSigner
+    public class AWS4Signer
     {
         public const bool IsIL2CPP = true;
 
@@ -57,11 +57,6 @@ namespace Amazon
         {
             HeaderKeys.XAmznTraceIdHeader
         };
-
-        public override ClientProtocol Protocol
-        {
-            get { return ClientProtocol.RestProtocol; }
-        }
 
         /// <summary>
         /// Calculates and signs the specified request using the AWS4 signing protocol by using the
@@ -90,13 +85,12 @@ namespace Amazon
         /// <exception cref="Amazon.Runtime.SignatureException">
         /// If any problems are encountered while signing the request.
         /// </exception>
-        public override void Sign(IRequest request,
+        public void Sign(IRequest request,
             IClientConfig clientConfig,
-            RequestMetrics metrics,
             string awsAccessKeyId,
             string awsSecretAccessKey)
         {
-            var signingResult = SignRequest(request, clientConfig, metrics, awsAccessKeyId, awsSecretAccessKey);
+            var signingResult = SignRequest(request, clientConfig, awsAccessKeyId, awsSecretAccessKey);
             request.Headers[HeaderKeys.AuthorizationHeader] = signingResult.ForAuthorizationHeader;
         }
 
@@ -132,13 +126,12 @@ namespace Amazon
         /// </remarks>
         public AWS4SigningResult SignRequest(IRequest request,
             IClientConfig clientConfig,
-            RequestMetrics metrics,
             string awsAccessKeyId,
             string awsSecretAccessKey)
         {
             var signedAt = InitializeHeaders(request.Headers, request.Endpoint);
-            var service = DetermineService(clientConfig);
-            var region = DetermineSigningRegion(clientConfig, service, request.AlternateEndpoint, request);
+            var service = "mqtt";
+            var region = RegionEndpoint.APSoutheast2.SystemName;
 
             var parametersToCanonicalize = GetParametersToCanonicalize(request);
             var canonicalParameters = CanonicalizeQueryParameters(parametersToCanonicalize);
@@ -151,8 +144,6 @@ namespace Amazon
                 sortedHeaders,
                 canonicalParameters,
                 bodyHash);
-            if (metrics != null)
-                metrics.AddProperty(Metric.CanonicalRequest, canonicalRequest);
 
             return ComputeSignature(awsAccessKeyId,
                 awsSecretAccessKey,
@@ -160,8 +151,7 @@ namespace Amazon
                 signedAt,
                 service,
                 CanonicalizeHeaderNames(sortedHeaders),
-                canonicalRequest,
-                metrics);
+                canonicalRequest);
         }
 
         #region Public Signing Helpers
@@ -500,57 +490,6 @@ namespace Amazon
 
         #region Private Signing Helpers
 
-        public static string DetermineSigningRegion(IClientConfig clientConfig,
-            string serviceName,
-            RegionEndpoint alternateEndpoint,
-            IRequest request)
-        {
-            // Alternate endpoint (IRequest.AlternateEndopoint) takes precedence over
-            // client config properties.
-            if (alternateEndpoint != null)
-            {
-                var serviceEndpoint =
-                    alternateEndpoint.GetEndpointForService(serviceName, clientConfig.UseDualstackEndpoint);
-                if (serviceEndpoint.AuthRegion != null)
-                    return serviceEndpoint.AuthRegion;
-
-                return alternateEndpoint.SystemName;
-            }
-
-            string authenticationRegion = clientConfig.AuthenticationRegion;
-            if (request != null && request.AuthenticationRegion != null)
-                authenticationRegion = request.AuthenticationRegion;
-
-            if (!string.IsNullOrEmpty(authenticationRegion))
-                return authenticationRegion.ToLowerInvariant();
-
-            if (!string.IsNullOrEmpty(clientConfig.ServiceURL))
-            {
-                var parsedRegion = AWSSDKUtils.DetermineRegion(clientConfig.ServiceURL);
-                if (!string.IsNullOrEmpty(parsedRegion))
-                    return parsedRegion.ToLowerInvariant();
-            }
-
-            var endpoint = clientConfig.RegionEndpoint;
-            if (endpoint != null)
-            {
-                var serviceEndpoint = endpoint.GetEndpointForService(serviceName, clientConfig.UseDualstackEndpoint);
-                if (!string.IsNullOrEmpty(serviceEndpoint.AuthRegion))
-                    return serviceEndpoint.AuthRegion;
-
-                return endpoint.SystemName;
-            }
-
-            return string.Empty;
-        }
-
-        internal static string DetermineService(IClientConfig clientConfig)
-        {
-            return !string.IsNullOrEmpty(clientConfig.AuthenticationServiceName)
-                ? clientConfig.AuthenticationServiceName
-                : AWSSDKUtils.DetermineService(clientConfig.DetermineServiceURL());
-        }
-
         /// <summary>
         /// Computes and returns the canonical request
         /// </summary>
@@ -813,43 +752,12 @@ namespace Amazon
             if (request.Content != null)
                 return request.Content;
 
-            var content = request.UseQueryString ? string.Empty : GetParametersAsString(request.Parameters);
+            var content = request.UseQueryString ? string.Empty : AWSSDKUtils.GetParametersAsString(request.Parameters);
             return Encoding.UTF8.GetBytes(content);
         }
 
         #endregion
 
-        private static string GetParametersAsString(IDictionary<string, string> parameters)
-        {
-            string[] array = new string[parameters.Keys.Count];
-            parameters.Keys.CopyTo
-                (array, 0);
-            Array.Sort
-                (array);
 
-            StringBuilder stringBuilder = new StringBuilder(512);
-            foreach
-            (string index in
-                array)
-            {
-                string parameter = parameters[index];
-                if (parameter != null)
-                {
-                    stringBuilder.Append(index);
-                    stringBuilder.Append('=');
-                    stringBuilder.Append(AWSSDKUtils.UrlEncode(parameter, false));
-                    stringBuilder.Append('&');
-                }
-            }
-
-            string str = stringBuilder.ToString();
-            if
-                (str.Length == 0)
-                return
-                    string.Empty;
-            return
-                str.Remove
-                    (str.Length - 1);
-        }
     }
 }
