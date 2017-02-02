@@ -1,11 +1,13 @@
 ﻿using System;
 using System.Collections.Specialized;
 using System.Globalization;
+using System.Security.Cryptography;
 using System.Text;
 using Amazon.CognitoIdentity.Model;
 using Amazon.Runtime;
 using Amazon.Runtime.Internal;
 using Amazon.Util;
+using WebSocketSharp;
 
 namespace Amazon.WebSocket
 {
@@ -33,15 +35,22 @@ namespace Amazon.WebSocket
         {
             const string method = "GET";
             const string canonicalUri = "/mqtt";
+            const string signedHeaders = "host";
 
             var canonicalRequest = new StringBuilder()
                 .AppendFormat("{0}\n", method)
                 .AppendFormat("{0}\n", canonicalUri)
                 .AppendFormat("{0}\n", canonicalQueryString)
-                .AppendFormat("{0}\n", canonicalHeaders);
-//            canonicalRequest.AppendFormat("{0}\n", String.Join(";", signedHeaders));
-//            canonicalRequest.Append(GetPayloadHash(request));
+                .AppendFormat("{0}\n", canonicalHeaders)
+                .AppendFormat("{0}\n", signedHeaders)
+                .Append(GetPayloadHash(''));
             return canonicalRequest.ToString();
+        }
+
+        public string GetPayloadHash(byte[] bytes)
+        {
+            var payloadHashBytes = CryptoUtilFactory.CryptoInstance.ComputeSHA256Hash(bytes);
+            return AWSSDKUtils.ToHex(payloadHashBytes, true);
         }
 
         public string GetCanonicalHeaders(Uri host)

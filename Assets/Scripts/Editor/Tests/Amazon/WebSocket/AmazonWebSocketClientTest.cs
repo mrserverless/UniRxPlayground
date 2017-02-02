@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Globalization;
 using Amazon.CognitoIdentity.Model;
-using Amazon.WebSocket;
 using NUnit.Framework;
 
 namespace Amazon.WebSocket
@@ -13,7 +12,6 @@ namespace Amazon.WebSocket
         {
             // given
             var client = new AmazonWebSocketClient();
-            var region = RegionEndpoint.APSoutheast2;
             var signedAt = DateTime.UtcNow;
             var queryString = "&X-Amz-Algorithm=AWS4-HMAC-SHA256" +
                               "&X-Amz-Credential=access/20170201/ap-southeast-2/iotdevicegateway/aws4_request" +
@@ -24,7 +22,7 @@ namespace Amazon.WebSocket
             var headers = "host:host";
 
             // when
-            var request = client.GetCanonicalRequest(queryString, headers);
+            var request = client.GetCanonicalRequest(queryString, headers, TODO);
 
             // then
             var expectedRequest = "GET\n" +
