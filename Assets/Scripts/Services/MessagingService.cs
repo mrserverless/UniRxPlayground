@@ -2,10 +2,6 @@
 using Amazon;
 using Amazon.CognitoIdentity;
 using Amazon.Runtime;
-using Amazon.Runtime.Internal.Auth;
-using Amazon.SQS;
-using Amazon.WebSocket;
-using UnityEngine;
 
 namespace Services
 {
